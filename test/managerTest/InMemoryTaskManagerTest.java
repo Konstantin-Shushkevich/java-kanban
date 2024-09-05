@@ -351,24 +351,66 @@ class InMemoryTaskManagerTest {
     void shouldCheckTheCorrectnessOfInMemoryHistoryManager() {
         Task taskTest1 = new Task("taskTestName1", "taskTestDescription1");
         Task taskTest2 = new Task("taskTestName2", "taskTestDescription2");
+        Epic epicWithSubTasksTest = new Epic("epicTestName1", "epicTestDescription1");
+        Epic epicNoSubTasksTest = new Epic("epicTestName2", "epicTestDescription2");
 
         inMemoryTaskManager.addTask(taskTest1);
         inMemoryTaskManager.addTask(taskTest2);
+        inMemoryTaskManager.addEpic(epicWithSubTasksTest);
+        inMemoryTaskManager.addEpic(epicNoSubTasksTest);
 
-        Task updatedTaskTest1 = inMemoryTaskManager.getTaskById(1);
-        Task updatedTaskTest2 = inMemoryTaskManager.getTaskById(2);
+        SubTask subTaskTest1 = new SubTask("subTaskTestName1", "subTaskTestDescription1",
+                epicWithSubTasksTest.getId());
+        SubTask subTaskTest2 = new SubTask("subTaskTestName2", "subTaskTestDescription2",
+                epicWithSubTasksTest.getId());
+
+        inMemoryTaskManager.addSubTask(subTaskTest1);
+        inMemoryTaskManager.addSubTask(subTaskTest2);
+
+        Task addedTaskTest1 = inMemoryTaskManager.getTaskById(1);
+        Task addedTaskTest2 = inMemoryTaskManager.getTaskById(2);
+        Task addedEpicWithSubTasksTest = inMemoryTaskManager.getEpicById(3);
+        inMemoryTaskManager.getEpicById(3);
+        Task addedEpicNoSubTasksTest = inMemoryTaskManager.getEpicById(4);
+        Task addedSubTaskTest1 = inMemoryTaskManager.getSubTaskById(5);
+        Task addedSubTaskTest2 = inMemoryTaskManager.getSubTaskById(6);
+        inMemoryTaskManager.getSubTaskById(5);
+        inMemoryTaskManager.getTaskById(2);
+
         List<Task> history = inMemoryTaskManager.getHistory();
 
-        assertEquals(history.get(0), updatedTaskTest1);
-        assertEquals(history.get(1), updatedTaskTest2);
+        assertEquals(history.get(0), addedTaskTest1);
+        assertEquals(history.get(1), addedEpicWithSubTasksTest);
+        assertEquals(history.get(2), addedEpicNoSubTasksTest);
+        assertEquals(history.get(3), addedSubTaskTest2);
+        assertEquals(history.get(4), addedSubTaskTest1);
+        assertEquals(history.get(5), addedTaskTest2);
 
         Task taskTest1Updated = new Task("taskTestName1Updated", "taskTestDescription1Updated",
                 TaskStatus.DONE, 1);
+
         inMemoryTaskManager.updateTask(taskTest1Updated);
         inMemoryTaskManager.getTaskById(1);
+        inMemoryTaskManager.deleteEpicById(4);
+        inMemoryTaskManager.deleteSubTaskById(6);
 
-        assertEquals(history.get(0), updatedTaskTest1);
-        assertEquals(history.get(1), updatedTaskTest2);
-        assertEquals(history.get(2), taskTest1Updated);
+        List<Task> historyFirstUpd = inMemoryTaskManager.getHistory();
+        assertEquals(historyFirstUpd.get(0), addedEpicWithSubTasksTest);
+        assertEquals(historyFirstUpd.get(1), addedSubTaskTest1);
+        assertEquals(historyFirstUpd.get(2), addedTaskTest2);
+        assertEquals(historyFirstUpd.get(3), taskTest1Updated);
+        assertEquals(4, historyFirstUpd.size());
+
+        inMemoryTaskManager.deleteAllEpics();
+
+        List<Task> historySecondUpd = inMemoryTaskManager.getHistory();
+        assertEquals(historySecondUpd.get(0), addedTaskTest2);
+        assertEquals(historySecondUpd.get(1), taskTest1Updated);
+        assertEquals(2, historySecondUpd.size());
+
+        inMemoryTaskManager.deleteAllTasks();
+
+        List<Task> historyThirdUpd = inMemoryTaskManager.getHistory();
+        assertTrue(historyThirdUpd.isEmpty());
     }
 }

@@ -6,6 +6,9 @@ import manager.TaskManager;
 import org.junit.jupiter.api.Test;
 import utils.Managers;
 
+import java.io.File;
+import java.io.IOException;
+
 import static org.junit.jupiter.api.Assertions.*;
 
 class ManagersTest {
@@ -23,14 +26,16 @@ class ManagersTest {
     }
 
     @Test
-    void shouldGetInitialisedInstanceOfFileBackedTaskManager() {
-        FileBackedTaskManager fileBackedTaskManager = Managers.getFileBackedTaskManager();
+    void shouldGetInitialisedInstanceOfFileBackedTaskManager() throws IOException {
+        File tempFile = File.createTempFile("dataTest",".csv");
+        FileBackedTaskManager fileBackedTaskManager = Managers.getFileBackedTaskManager(tempFile.getPath());
         assertNotNull(fileBackedTaskManager, "Экземпляр FileBackedTaskManager не проинициализирован.");
     }
 
     @Test
-    void shouldGetInitialisedInstanceOfFileBackedTaskManagerFromFile() {
-        FileBackedTaskManager fileBackedTaskManager = Managers.getFileBackedTaskManager();
+    void shouldGetInitialisedInstanceOfFileBackedTaskManagerFromFile() throws IOException {
+        File tempFile = File.createTempFile("dataTest",".csv");
+        FileBackedTaskManager fileBackedTaskManager = Managers.downloadFromFile(tempFile.getPath());
         assertNotNull(fileBackedTaskManager, "Экземпляр FileBackedTaskManager из файла не восстановлен.");
     }
 }

@@ -119,20 +119,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                 currentLine = bufferedReader.readLine();
                 String[] dataInLine = currentLine.split(",");
 
+                if (Integer.parseInt(dataInLine[0]) > maxId) {
+                    maxId = Integer.parseInt(dataInLine[0]);
+                }
+
                 if (TaskTypes.valueOf(dataInLine[1]) == TaskTypes.TASK) {
                     Task task = new Task(dataInLine[2], dataInLine[4], TaskStatus.valueOf(dataInLine[3]),
                             Integer.parseInt(dataInLine[0]));
                     loadedTasks.put(task.getId(), task);
-                    if (task.getId() > maxId) {
-                        maxId = task.getId();
-                    }
                 } else if (TaskTypes.valueOf(dataInLine[1]) == TaskTypes.EPIC) {
                     Epic epic = new Epic(dataInLine[2], dataInLine[4], TaskStatus.valueOf(dataInLine[3]),
                             Integer.parseInt(dataInLine[0]));
                     loadedEpics.put(epic.getId(), epic);
-                    if (epic.getId() > maxId) {
-                        maxId = epic.getId();
-                    }
                 } else {
                     SubTask subTask = new SubTask(dataInLine[2], dataInLine[4], TaskStatus.valueOf(dataInLine[3]),
                             Integer.parseInt(dataInLine[0]), Integer.parseInt(dataInLine[5]));
@@ -142,10 +140,6 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     Epic currentEpic = loadedEpics.get(epicId);
                     currentEpic.addSubTaskIdInEpic(Integer.parseInt(dataInLine[5]));
                     loadedEpics.put(epicId, currentEpic);
-
-                    if (subTask.getId() > maxId) {
-                        maxId = subTask.getId();
-                    }
                 }
             }
         } catch (IOException e) {

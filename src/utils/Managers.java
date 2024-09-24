@@ -11,8 +11,8 @@ public class Managers {
         return new InMemoryTaskManager();
     }
 
-    public static FileBackedTaskManager getFileBackedTaskManager() {
-        return new FileBackedTaskManager("data\\data.csv");
+    public static FileBackedTaskManager getFileBackedTaskManager(String path) {
+        return new FileBackedTaskManager(path);
     }
 
     public static FileBackedTaskManager downloadFromFile(String path) {

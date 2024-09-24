@@ -5,13 +5,13 @@ import java.util.Objects;
 public class SubTask extends Task {
     private int epicId;
 
-    // Конструктор для добавления задач класса tasks.SubTask
+    // Конструктор для добавления задач класса SubTask
     public SubTask(String name, String description, int epicId) {
         super(name, description);
         this.epicId = epicId;
     }
 
-    // Конструктор для обновления задачи класса tasks.SubTask
+    // Конструктор для обновления задачи класса SubTask
     public SubTask(String name, String description, TaskStatus status, int id, int epicId) {
         super(name, description, status, id);
         this.epicId = epicId;
@@ -33,5 +33,11 @@ public class SubTask extends Task {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), epicId);
+    }
+
+    @Override
+    public String toStringForFile() {
+        return String.format("%s,%s,%s,%s,%s,%s", getId(), TaskTypes.SUBTASK, getName(), getStatus(), getDescription(),
+                getEpicId());
     }
 }

@@ -71,6 +71,11 @@ public class Task {
 
     @Override
     public String toString() {
-        return "{" + "name='" + name + '\'' + ", description='" + description + '\'' + ", id=" + id + ", status=" + status + '}';
+        return "{" + "name='" + name + '\'' + ", description='" + description + '\'' + ", id=" + id + ", status=" +
+                status + '}';
+    }
+
+    public String toStringForFile() {
+        return String.format("%s,%s,%s,%s,%s", id, TaskTypes.TASK, name, status, description);
     }
 }

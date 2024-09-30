@@ -19,6 +19,12 @@ public class Epic extends Task {
         this.subTasksIdInEpic = new ArrayList<>();
     }
 
+    // Конструктор для загрузки задачи типа tasks.Epic из файла
+    public Epic(String name, String description, TaskStatus taskStatus, int id) {
+        super(name, description, taskStatus, id);
+        this.subTasksIdInEpic = new ArrayList<>();
+    }
+
     public List<Integer> getSubTasksIdInEpic() {
         return subTasksIdInEpic;
     }
@@ -47,5 +53,10 @@ public class Epic extends Task {
     @Override
     public int hashCode() {
         return Objects.hash(super.hashCode(), subTasksIdInEpic);
+    }
+
+    @Override
+    public String toStringForFile() {
+        return String.format("%s,%s,%s,%s,%s", getId(), TaskTypes.EPIC, getName(), getStatus(), getDescription());
     }
 }

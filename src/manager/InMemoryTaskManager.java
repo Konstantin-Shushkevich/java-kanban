@@ -14,13 +14,28 @@ import java.util.ArrayList;
 
 public class InMemoryTaskManager implements TaskManager {
     private int id = 0;
-    private final Map<Integer, Task> tasks = new HashMap<>();
-    private final Map<Integer, SubTask> subTasks = new HashMap<>();
-    private final Map<Integer, Epic> epics = new HashMap<>();
-    private final HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
+    private Map<Integer, Task> tasks = new HashMap<>();
+    private Map<Integer, SubTask> subTasks = new HashMap<>();
+    private Map<Integer, Epic> epics = new HashMap<>();
+    private HistoryManager inMemoryHistoryManager = Managers.getDefaultHistory();
+
+    protected InMemoryTaskManager(Map<Integer, Task> tasks,
+                                  Map<Integer, SubTask> subTasks,
+                                  Map<Integer, Epic> epics) {
+        this.tasks = tasks;
+        this.subTasks = subTasks;
+        this.epics = epics;
+    }
+
+    public InMemoryTaskManager() {
+    }
 
     private int addNewId() { // Присвоение id
         return ++id;
+    }
+
+    protected void setId(int id) {
+        this.id = id;
     }
 
     //
@@ -29,7 +44,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteAllTasks() { // Удаление всех задач типа Task
         for (Integer id : tasks.keySet()) {
-            inMemoryHistoryManager.removeFromHistory(id);
+            inMemoryHistoryManager.remove(id);
         }
         tasks.clear();
     }
@@ -43,7 +58,7 @@ public class InMemoryTaskManager implements TaskManager {
     public Task getTaskById(int taskId) { // Получение задачи типа Task по идентификатору
         Task task = tasks.get(taskId);
         if (task != null) {
-            inMemoryHistoryManager.addToHistory(task);
+            inMemoryHistoryManager.add(task);
         }
         return task;
     }
@@ -68,7 +83,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteTaskById(int taskId) { // Удаление задачи типа Task по идентификатору
         tasks.remove(taskId);
-        inMemoryHistoryManager.removeFromHistory(taskId);
+        inMemoryHistoryManager.remove(taskId);
     }
 
     //
@@ -77,7 +92,7 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteAllSubTasks() { // Удаление всех задач типа SubTask
         for (Integer id : subTasks.keySet()) {
-            inMemoryHistoryManager.removeFromHistory(id);
+            inMemoryHistoryManager.remove(id);
         }
 
         subTasks.clear();
@@ -97,7 +112,7 @@ public class InMemoryTaskManager implements TaskManager {
     public SubTask getSubTaskById(int subTaskId) { // Получение задачи типа SubTask по идентификатору
         SubTask subTask = subTasks.get(subTaskId);
         if (subTask != null) {
-            inMemoryHistoryManager.addToHistory(subTask);
+            inMemoryHistoryManager.add(subTask);
         }
         return subTask;
     }
@@ -136,7 +151,7 @@ public class InMemoryTaskManager implements TaskManager {
             epicForCurrentSubTask.removeSubTaskIdInEpic(subTaskId);
             calculateEpicStatus(epicForCurrentSubTask);
             subTasks.remove(subTaskId);
-            inMemoryHistoryManager.removeFromHistory(subTaskId);
+            inMemoryHistoryManager.remove(subTaskId);
         }
     }
 
@@ -146,11 +161,11 @@ public class InMemoryTaskManager implements TaskManager {
     @Override
     public void deleteAllEpics() { // Удаление всех задач типа Epic и связанных с ними SubTask
         for (Integer id : epics.keySet()) {
-            inMemoryHistoryManager.removeFromHistory(id);
+            inMemoryHistoryManager.remove(id);
         }
 
         for (Integer id : subTasks.keySet()) {
-            inMemoryHistoryManager.removeFromHistory(id);
+            inMemoryHistoryManager.remove(id);
         }
 
         epics.clear();
@@ -166,7 +181,7 @@ public class InMemoryTaskManager implements TaskManager {
     public Epic getEpicById(int epicId) { // Получение по идентификатору задачи типа Epic
         Epic epic = epics.get(epicId);
         if (epic != null) {
-            inMemoryHistoryManager.addToHistory(epic);
+            inMemoryHistoryManager.add(epic);
         }
         return epic;
     }
@@ -210,10 +225,10 @@ public class InMemoryTaskManager implements TaskManager {
 
             for (Integer currentSubTaskId : subTasksInEpicId) {
                 subTasks.remove(currentSubTaskId);
-                inMemoryHistoryManager.removeFromHistory(currentSubTaskId);
+                inMemoryHistoryManager.remove(currentSubTaskId);
             }
             epics.remove(epicId);
-            inMemoryHistoryManager.removeFromHistory(epicId);
+            inMemoryHistoryManager.remove(epicId);
         }
     }
 

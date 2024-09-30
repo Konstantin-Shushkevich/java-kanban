@@ -6,7 +6,6 @@ import utils.Managers;
 public class Main {
     public static void main(String[] args) {
         InMemoryTaskManager inMemoryTaskManager = (InMemoryTaskManager) Managers.getDefault();
-
         Epic epicWithSubTasks = new Epic("Курс Java", "Изучить Java");
         Epic epicNoSubTasks = new Epic("Успешно завершить 2-й модуль", "Сдать ФЗ №6 и т.д.");
 

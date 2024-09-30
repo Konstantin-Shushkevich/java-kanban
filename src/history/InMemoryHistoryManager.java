@@ -10,15 +10,15 @@ public class InMemoryHistoryManager implements HistoryManager {
     private Node head;
 
     @Override
-    public void addToHistory(Task task) {
+    public void add(Task task) {
         if (history.containsKey(task.getId())) {
-            removeFromHistory(task.getId());
+            remove(task.getId());
         }
         linkLast(task);
     }
 
     @Override
-    public void removeFromHistory(int id) {
+    public void remove(int id) {
         if (history.containsKey(id)) {
             removeNode(history.get(id));
             history.remove(id);
@@ -79,6 +79,7 @@ public class InMemoryHistoryManager implements HistoryManager {
         }
         return tasks;
     }
+
     private static class Node {
         private Task data;
         private Node next;

@@ -1,19 +1,22 @@
 package tasks;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
 import java.util.Objects;
 
 public class SubTask extends Task {
     private int epicId;
 
-    // Конструктор для добавления задач класса SubTask
-    public SubTask(String name, String description, int epicId) {
-        super(name, description);
+    // Конструктор для добавления задач типа SubTask
+    public SubTask(String name, String description, int epicId, Duration duration, LocalDateTime startTime) {
+        super(name, description, duration, startTime);
         this.epicId = epicId;
     }
 
-    // Конструктор для обновления задачи класса SubTask
-    public SubTask(String name, String description, TaskStatus status, int id, int epicId) {
-        super(name, description, status, id);
+    // Конструктор для обновления задачи типа SubTask
+    public SubTask(String name, String description, TaskStatus status, int id, int epicId, Duration duration,
+                   LocalDateTime startTime) {
+        super(name, description, status, id, duration, startTime);
         this.epicId = epicId;
     }
 
@@ -37,7 +40,7 @@ public class SubTask extends Task {
 
     @Override
     public String toStringForFile() {
-        return String.format("%s,%s,%s,%s,%s,%s", getId(), TaskTypes.SUBTASK, getName(), getStatus(), getDescription(),
-                getEpicId());
+        return String.format("%s,%s,%s,%s,%s,%s,%s,%s", getId(), TaskTypes.SUBTASK, getName(), getDescription(),
+                getStatus(), getDuration().toMinutes(), getStartTime(), getEpicId());
     }
 }

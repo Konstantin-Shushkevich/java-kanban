@@ -9,6 +9,10 @@ import tasks.Task;
 import tasks.TaskStatus;
 import utils.Managers;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.Month;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -24,7 +28,8 @@ class InMemoryTaskManagerTest {
     // Тесты для Task
     @Test
     void shouldReturnTrueIfTaskIsAdded() {
-        Task taskTest1 = new Task("taskTestName1", "taskTestDescription1");
+        Task taskTest1 = new Task("taskTestName1", "taskTestDescription1", Duration.ofMinutes(30),
+                LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
 
         inMemoryTaskManager.addTask(taskTest1);
         List<Task> tasksTestList = inMemoryTaskManager.getTaskList();
@@ -34,8 +39,10 @@ class InMemoryTaskManagerTest {
 
     @Test
     void shouldReturnTrueAfterDeleteAllTasks() {
-        Task taskTest1 = new Task("taskTestName1", "taskTestDescription1");
-        Task taskTest2 = new Task("taskTestName2", "taskTestDescription2");
+        Task taskTest1 = new Task("taskTestName1", "taskTestDescription1", Duration.ofMinutes(30),
+                LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
+        Task taskTest2 = new Task("taskTestName2", "taskTestDescription2", Duration.ofMinutes(30),
+                LocalDateTime.of(2024, Month.JANUARY, 2, 0, 0));
 
         inMemoryTaskManager.addTask(taskTest1);
         inMemoryTaskManager.addTask(taskTest2);
@@ -48,7 +55,8 @@ class InMemoryTaskManagerTest {
 
     @Test
     void shouldReturnTaskById() {
-        Task taskTest1 = new Task("taskTestName1", "taskTestDescription1");
+        Task taskTest1 = new Task("taskTestName1", "taskTestDescription1", Duration.ofMinutes(30),
+                LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
 
         inMemoryTaskManager.addTask(taskTest1);
 
@@ -61,7 +69,8 @@ class InMemoryTaskManagerTest {
 
     @Test
     void shouldDeleteTaskById() {
-        Task taskTest1 = new Task("taskTestName1", "taskTestDescription1");
+        Task taskTest1 = new Task("taskTestName1", "taskTestDescription1", Duration.ofMinutes(30),
+                LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
 
         inMemoryTaskManager.addTask(taskTest1);
 
@@ -73,27 +82,33 @@ class InMemoryTaskManagerTest {
 
     @Test
     void shouldCompareOfEqualityOfTaskInstances() {
-        Task taskTest1 = new Task("taskTestName1", "taskTestDescription1");
+        Task taskTest1 = new Task("taskTestName1", "taskTestDescription1", Duration.ofMinutes(30),
+                LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
 
         inMemoryTaskManager.addTask(taskTest1);
 
         int id = taskTest1.getId();
         TaskStatus taskStatus = taskTest1.getStatus();
 
-        Task taskTest2 = new Task("taskTestName1", "taskTestDescription1", taskStatus, id);
+        Task taskTest2 = new Task("taskTestName1", "taskTestDescription1", taskStatus, id,
+                Duration.ofMinutes(30),
+                LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
 
         assertEquals(taskTest1, taskTest2, "Экземпляры класса Task не равны при равных id.");
     }
 
     @Test
     void shouldCheckTheCorrectnessOfTaskUpdate() {
-        Task taskTest1 = new Task("taskTestName1", "taskTestDescription1");
+        Task taskTest1 = new Task("taskTestName1", "taskTestDescription1", Duration.ofMinutes(30),
+                LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
 
         inMemoryTaskManager.addTask(taskTest1);
 
         int numberOfTasks = inMemoryTaskManager.getTaskList().size();
-        int id = taskTest1.getId();
-        Task taskTest2 = new Task("taskTestName1", "taskTestDescription2", TaskStatus.DONE, id);
+        int id = inMemoryTaskManager.getTaskList().getFirst().getId();
+        Task taskTest2 = new Task("taskTestName1", "taskTestDescription2", TaskStatus.DONE, id,
+                Duration.ofMinutes(30),
+                LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
 
         inMemoryTaskManager.updateTask(taskTest2);
 
@@ -113,7 +128,8 @@ class InMemoryTaskManagerTest {
         inMemoryTaskManager.addEpic(epic);
 
         int epicId = epic.getId();
-        SubTask subTaskTest1 = new SubTask("testName1", "testDescription1", epicId);
+        SubTask subTaskTest1 = new SubTask("testName1", "testDescription1", epicId,
+                Duration.ofMinutes(30), LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
 
         inMemoryTaskManager.addSubTask(subTaskTest1);
 
@@ -129,13 +145,15 @@ class InMemoryTaskManagerTest {
         inMemoryTaskManager.addEpic(epic);
 
         int epicId = epic.getId();
-        SubTask subTaskTest1 = new SubTask("subTaskTestName1", "subTaskTestDescription1", epicId);
+        SubTask subTaskTest1 = new SubTask("subTaskTestName1", "subTaskTestDescription1", epicId,
+                Duration.ofMinutes(30), LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
 
         inMemoryTaskManager.addSubTask(subTaskTest1);
 
         int subTaskAsEpicForTestId = subTaskTest1.getId();
         SubTask subTaskTest2 = new SubTask("subTaskTestName2", "subTaskTestDescription2",
-                subTaskAsEpicForTestId);
+                subTaskAsEpicForTestId, Duration.ofMinutes(30),
+                LocalDateTime.of(2025, Month.JANUARY, 1, 0, 0));
 
         inMemoryTaskManager.addSubTask(subTaskTest2);
 
@@ -152,8 +170,10 @@ class InMemoryTaskManagerTest {
         inMemoryTaskManager.addEpic(epic);
 
         int epicId = epic.getId();
-        SubTask subTaskTest1 = new SubTask("subTaskTestName1", "subTaskTestDescription1", epicId);
-        SubTask subTaskTest2 = new SubTask("subTaskTestName2", "subTaskTestDescription2", epicId);
+        SubTask subTaskTest1 = new SubTask("subTaskTestName1", "subTaskTestDescription1", epicId,
+                Duration.ofMinutes(30), LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
+        SubTask subTaskTest2 = new SubTask("subTaskTestName2", "subTaskTestDescription2", epicId,
+                Duration.ofMinutes(30), LocalDateTime.of(2025, Month.JANUARY, 1, 0, 0));
 
         inMemoryTaskManager.addSubTask(subTaskTest1);
         inMemoryTaskManager.addSubTask(subTaskTest2);
@@ -171,7 +191,8 @@ class InMemoryTaskManagerTest {
         inMemoryTaskManager.addEpic(epic);
 
         int epicId = epic.getId();
-        SubTask subTaskTest1 = new SubTask("subTaskTestName1", "subTaskTestDescription1", epicId);
+        SubTask subTaskTest1 = new SubTask("subTaskTestName1", "subTaskTestDescription1", epicId,
+                Duration.ofMinutes(30), LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
 
         inMemoryTaskManager.addSubTask(subTaskTest1);
 
@@ -188,11 +209,12 @@ class InMemoryTaskManagerTest {
         inMemoryTaskManager.addEpic(epic);
 
         int epicId = epic.getId();
-        SubTask subTaskTest1 = new SubTask("subTaskTestName1", "subTaskTestDescription1", epicId);
+        SubTask subTaskTest1 = new SubTask("subTaskTestName1", "subTaskTestDescription1", epicId,
+                Duration.ofMinutes(30), LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
 
         inMemoryTaskManager.addSubTask(subTaskTest1);
 
-        int id = subTaskTest1.getId();
+        int id = inMemoryTaskManager.getSubTaskList().getFirst().getId();
 
         inMemoryTaskManager.deleteSubTaskById(id);
         assertNull(inMemoryTaskManager.getSubTaskById(id), "Задача SubTask с id = " + id + " не была удалена");
@@ -205,14 +227,16 @@ class InMemoryTaskManagerTest {
         inMemoryTaskManager.addEpic(epic);
 
         int epicId = epic.getId();
-        SubTask subTaskTest1 = new SubTask("subTaskTestName1", "subTaskTestDescription1", epicId);
+        SubTask subTaskTest1 = new SubTask("subTaskTestName1", "subTaskTestDescription1", epicId,
+                Duration.ofMinutes(30), LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
 
         inMemoryTaskManager.addSubTask(subTaskTest1);
 
         int id = subTaskTest1.getId();
         TaskStatus taskStatus = subTaskTest1.getStatus();
         SubTask subTaskTest2 = new SubTask("subTaskTestName1", "subTaskTestDescription1", taskStatus,
-                id, epicId);
+                id, epicId, Duration.ofMinutes(30),
+                LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
 
         assertEquals(subTaskTest1, subTaskTest2, "Экземпляры класса SubTask не равны при равных id.");
     }
@@ -225,14 +249,16 @@ class InMemoryTaskManagerTest {
 
         int epicId = epic.getId();
 
-        SubTask subTaskTest1 = new SubTask("subTaskTestName1", "subTaskTestDescription1", epicId);
+        SubTask subTaskTest1 = new SubTask("subTaskTestName1", "subTaskTestDescription1", epicId,
+                Duration.ofMinutes(30), LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
 
         inMemoryTaskManager.addSubTask(subTaskTest1);
 
         int numberOfSubTasks = inMemoryTaskManager.getSubTasksInEpic(epicId).size();
         int id = subTaskTest1.getId();
         SubTask subTaskTest2 = new SubTask("subTaskTestName2", "subTaskTestDescription2",
-                TaskStatus.DONE, id, epicId);
+                TaskStatus.DONE, id, epicId, Duration.ofMinutes(45),
+                LocalDateTime.of(2024, Month.JANUARY, 2, 0, 0));
 
         inMemoryTaskManager.updateSubTask(subTaskTest2);
 
@@ -265,7 +291,8 @@ class InMemoryTaskManagerTest {
         inMemoryTaskManager.addEpic(epic2);
 
         int firstEpicId = epic1.getId();
-        SubTask subTaskTest1 = new SubTask("subTaskTestName1", "subTaskTestDescription1", firstEpicId);
+        SubTask subTaskTest1 = new SubTask("subTaskTestName1", "subTaskTestDescription1", firstEpicId,
+                Duration.ofMinutes(30), LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
 
         inMemoryTaskManager.addSubTask(subTaskTest1);
         inMemoryTaskManager.deleteAllEpics();
@@ -284,9 +311,9 @@ class InMemoryTaskManagerTest {
         inMemoryTaskManager.addEpic(epic1);
 
         int id = epic1.getId();
-        Task recievedByIdEpic = inMemoryTaskManager.getEpicById(id);
+        Task receivedByIdEpic = inMemoryTaskManager.getEpicById(id);
 
-        assertEquals(recievedByIdEpic, epic1, "Возвращаемый объект не соответствует ожидаемому.");
+        assertEquals(receivedByIdEpic, epic1, "Возвращаемый объект не соответствует ожидаемому.");
     }
 
     @Test
@@ -296,7 +323,8 @@ class InMemoryTaskManagerTest {
         inMemoryTaskManager.addEpic(epic1);
 
         int epicId = epic1.getId();
-        SubTask subTaskTest1 = new SubTask("subTaskTestName1", "subTaskTestDescription1", epicId);
+        SubTask subTaskTest1 = new SubTask("subTaskTestName1", "subTaskTestDescription1", epicId,
+                Duration.ofMinutes(30), LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
 
         inMemoryTaskManager.addSubTask(subTaskTest1);
         inMemoryTaskManager.deleteEpicById(epicId);
@@ -323,34 +351,60 @@ class InMemoryTaskManagerTest {
 
         inMemoryTaskManager.addEpic(epic);
 
-        int epicId = epic.getId();
-        TaskStatus defaultStatus = epic.getStatus();
-        SubTask subTaskTest1 = new SubTask("subTaskTestName1", "subTaskTestDescription1", epicId);
+        SubTask subTaskTest1 = new SubTask("subTaskTestName1", "subTaskTestDescription1", epic.getId(),
+                Duration.ofMinutes(30), LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
+        SubTask subTaskTest2 = new SubTask("subTaskTestName2", "subTaskTestDescription2", epic.getId(),
+                Duration.ofMinutes(30), LocalDateTime.of(2024, Month.JANUARY, 1, 2, 0));
 
         inMemoryTaskManager.addSubTask(subTaskTest1);
+        inMemoryTaskManager.addSubTask(subTaskTest2);
+        assertSame(epic.getStatus(), TaskStatus.NEW, "Epic с 2 SubTask со статусом NEW - не NEW");
 
-        int id = subTaskTest1.getId();
-        SubTask subTaskTestInProgress = new SubTask("subTaskTestName1", "subTaskTestDescription1",
-                TaskStatus.IN_PROGRESS, id, epicId);
-        SubTask subTaskTestDone = new SubTask("subTaskTestName1", "subTaskTestDescription1",
-                TaskStatus.DONE, id, epicId);
+        int idOfSubTaskTest1 = subTaskTest1.getId();
+        SubTask subTaskTest1InProgress = new SubTask("subTaskTestName1", "subTaskTestDescription1",
+                TaskStatus.IN_PROGRESS, idOfSubTaskTest1, epic.getId(), Duration.ofMinutes(30),
+                LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
+        inMemoryTaskManager.updateSubTask(subTaskTest1InProgress);
+        assertSame(epic.getStatus(), TaskStatus.IN_PROGRESS,
+                "Epic с 1 SubTask (NEW) и 1 SubTask (IN_PROGRESS) - не IN_PROGRESS");
 
-        TaskStatus newStatus = epic.getStatus();
-        inMemoryTaskManager.updateSubTask(subTaskTestInProgress);
-        TaskStatus inProgressStatus = epic.getStatus();
-        inMemoryTaskManager.updateSubTask(subTaskTestDone);
-        TaskStatus doneStatus = epic.getStatus();
+        int idOfSubTaskTest2 = subTaskTest2.getId();
+        SubTask subTaskTest2InProgress = new SubTask("subTaskTestName2", "subTaskTestDescription2",
+                TaskStatus.IN_PROGRESS, idOfSubTaskTest2, epic.getId(), Duration.ofMinutes(30),
+                LocalDateTime.of(2024, Month.JANUARY, 1, 2, 0));
+        inMemoryTaskManager.updateSubTask(subTaskTest2InProgress);
+        assertSame(epic.getStatus(), TaskStatus.IN_PROGRESS,
+                "Epic с 2 SubTask со статусом IN_PROGRESS - не IN_PROGRESS");
 
-        assertTrue(defaultStatus == TaskStatus.NEW && newStatus == TaskStatus.NEW &&
-                        inProgressStatus == TaskStatus.IN_PROGRESS && doneStatus == TaskStatus.DONE,
-                "Обновление задачи типа типа Epic и связанного SubTask произведено некорректно.");
+        SubTask subTaskTest1Done = new SubTask("subTaskTestName1", "subTaskTestDescription1",
+                TaskStatus.DONE, idOfSubTaskTest1, epic.getId(), Duration.ofMinutes(30),
+                LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
+        inMemoryTaskManager.updateSubTask(subTaskTest1Done);
+        assertSame(epic.getStatus(), TaskStatus.IN_PROGRESS,
+                "Epic с 1 SubTask (DONE) и 1 SubTask (IN_PROGRESS) - не IN_PROGRESS");
+
+        SubTask subTaskTest2Done = new SubTask("subTaskTestName2", "subTaskTestDescription2",
+                TaskStatus.DONE, idOfSubTaskTest2, epic.getId(), Duration.ofMinutes(30),
+                LocalDateTime.of(2024, Month.JANUARY, 1, 2, 0));
+        inMemoryTaskManager.updateSubTask(subTaskTest2Done);
+        assertSame(epic.getStatus(), TaskStatus.DONE,
+                "Epic с 2 SubTask со статусом DONE - не DONE");
+
+        SubTask subTaskTest1NewAgain = new SubTask("subTaskTestName1", "subTaskTestDescription1",
+                TaskStatus.NEW, idOfSubTaskTest1, epic.getId(), Duration.ofMinutes(30),
+                LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
+        inMemoryTaskManager.updateSubTask(subTaskTest1NewAgain);
+        assertSame(epic.getStatus(), TaskStatus.IN_PROGRESS,
+                "Epic с 1 SubTask (DONE) и 1 SubTask (NEW) - не IN_PROGRESS");
     }
 
     // Проверка работы InMemoryHistoryManager через inMemoryTaskManager
     @Test
     void shouldCheckTheCorrectnessOfInMemoryHistoryManager() {
-        Task taskTest1 = new Task("taskTestName1", "taskTestDescription1");
-        Task taskTest2 = new Task("taskTestName2", "taskTestDescription2");
+        Task taskTest1 = new Task("taskTestName1", "taskTestDescription1", Duration.ofMinutes(30),
+                LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
+        Task taskTest2 = new Task("taskTestName2", "taskTestDescription2", Duration.ofMinutes(40),
+                LocalDateTime.of(2024, Month.MAY, 1, 0, 0));
         Epic epicWithSubTasksTest = new Epic("epicTestName1", "epicTestDescription1");
         Epic epicNoSubTasksTest = new Epic("epicTestName2", "epicTestDescription2");
 
@@ -360,9 +414,11 @@ class InMemoryTaskManagerTest {
         inMemoryTaskManager.addEpic(epicNoSubTasksTest);
 
         SubTask subTaskTest1 = new SubTask("subTaskTestName1", "subTaskTestDescription1",
-                epicWithSubTasksTest.getId());
+                epicWithSubTasksTest.getId(), Duration.ofMinutes(30),
+                LocalDateTime.of(2024, Month.JANUARY, 2, 0, 0));
         SubTask subTaskTest2 = new SubTask("subTaskTestName2", "subTaskTestDescription2",
-                epicWithSubTasksTest.getId());
+                epicWithSubTasksTest.getId(), Duration.ofMinutes(30),
+                LocalDateTime.of(2024, Month.JANUARY, 1, 12, 0));
 
         inMemoryTaskManager.addSubTask(subTaskTest1);
         inMemoryTaskManager.addSubTask(subTaskTest2);
@@ -387,7 +443,8 @@ class InMemoryTaskManagerTest {
         assertEquals(history.get(5), addedTaskTest2);
 
         Task taskTest1Updated = new Task("taskTestName1Updated", "taskTestDescription1Updated",
-                TaskStatus.DONE, 1);
+                TaskStatus.DONE, 1, Duration.ofMinutes(45),
+                LocalDateTime.of(2027, Month.JANUARY, 1, 12, 0));
 
         inMemoryTaskManager.updateTask(taskTest1Updated);
         inMemoryTaskManager.getTaskById(1);
@@ -412,5 +469,84 @@ class InMemoryTaskManagerTest {
 
         List<Task> historyThirdUpd = inMemoryTaskManager.getHistory();
         assertTrue(historyThirdUpd.isEmpty());
+    }
+
+    @Test
+    void shouldCheckTheCorrectnessOfTimeValidation() {
+        Task taskTest1 = new Task("taskTestName1", "taskTestDescription1", Duration.ofMinutes(30),
+                LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
+        Task taskTest2 = new Task("taskTestName2", "taskTestDescription2", Duration.ofMinutes(30),
+                LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
+        inMemoryTaskManager.addTask(taskTest1);
+        inMemoryTaskManager.addTask(taskTest2);
+        assertTrue(inMemoryTaskManager.getTaskList().size() == 1 &&
+                        inMemoryTaskManager.getTaskList().getFirst() == taskTest1,
+                "Были добавлены две задачи с одинаковым временем начала и длительностью!");
+
+        Task taskTest3 = new Task("taskTestName3", "taskTestDescription3", Duration.ofMinutes(30),
+                LocalDateTime.of(2024, Month.JANUARY, 1, 0, 25));
+        inMemoryTaskManager.addTask(taskTest3);
+        assertTrue(inMemoryTaskManager.getTaskList().size() == 1 &&
+                        inMemoryTaskManager.getTaskList().getFirst() == taskTest1,
+                "Начало добавленной задачи пересекается с временем выполнения добавленной раннее задачи!");
+
+        Task taskTest4 = new Task("taskTestName4", "taskTestDescription4", Duration.ofMinutes(30),
+                LocalDateTime.of(2023, Month.DECEMBER, 31, 23, 55));
+        inMemoryTaskManager.addTask(taskTest4);
+        assertTrue(inMemoryTaskManager.getTaskList().size() == 1 &&
+                        inMemoryTaskManager.getTaskList().getFirst() == taskTest1,
+                "Окончание добавленной задачи пересекается с временем выполнения добавленной раннее задачи!");
+    }
+
+    @Test
+    void shouldCheckTheCorrectnessOfGettingPrioritizedTasks() {
+        Task taskTest1 = new Task("taskTestName1", "taskTestDescription1", Duration.ofMinutes(30),
+                LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
+        Task taskTest2 = new Task("taskTestName2", "taskTestDescription2", Duration.ofMinutes(40),
+                LocalDateTime.of(2024, Month.FEBRUARY, 1, 0, 0));
+        Epic epicTest = new Epic("epicTestName1", "epicTestDescription1");
+
+        inMemoryTaskManager.addTask(taskTest1);
+        inMemoryTaskManager.addTask(taskTest2);
+        inMemoryTaskManager.addEpic(epicTest);
+
+        SubTask subTaskTest1 = new SubTask("subTaskTestName1", "subTaskTestDescription1",
+                epicTest.getId(), Duration.ofMinutes(30),
+                LocalDateTime.of(2024, Month.MARCH, 2, 0, 0));
+        SubTask subTaskTest2 = new SubTask("subTaskTestName2", "subTaskTestDescription2",
+                epicTest.getId(), Duration.ofMinutes(30),
+                LocalDateTime.of(2024, Month.APRIL, 1, 12, 0));
+        inMemoryTaskManager.addSubTask(subTaskTest1);
+        inMemoryTaskManager.addSubTask(subTaskTest2);
+
+        List<Task> prioritizedTasksTestAsList = new ArrayList<>(inMemoryTaskManager.getPrioritizedTasks());
+        assertTrue(prioritizedTasksTestAsList.size() == 4 &&
+                        prioritizedTasksTestAsList.get(0) == taskTest1 &&
+                        prioritizedTasksTestAsList.get(1) == taskTest2 &&
+                        prioritizedTasksTestAsList.get(2) == subTaskTest1 &&
+                        prioritizedTasksTestAsList.get(3) == subTaskTest2,
+                "Нарушен порядок задач в ранжированной коллекции!");
+    }
+
+    @Test
+    void shouldCheckTheCorrectnessOfTimeFeaturesOfEpic() {
+        Epic epicWithSubTasksTest = new Epic("epicTestName1", "epicTestDescription1");
+
+        inMemoryTaskManager.addEpic(epicWithSubTasksTest);
+
+        SubTask subTaskTest1 = new SubTask("subTaskTestName1", "subTaskTestDescription1",
+                epicWithSubTasksTest.getId(), Duration.ofMinutes(30),
+                LocalDateTime.of(2024, Month.JANUARY, 2, 0, 0));
+        SubTask subTaskTest2 = new SubTask("subTaskTestName2", "subTaskTestDescription2",
+                epicWithSubTasksTest.getId(), Duration.ofMinutes(30),
+                LocalDateTime.of(2024, Month.MARCH, 1, 12, 0));
+        inMemoryTaskManager.addSubTask(subTaskTest1);
+        inMemoryTaskManager.addSubTask(subTaskTest2);
+
+        assertTrue(epicWithSubTasksTest.getStartTime().equals(subTaskTest1.getStartTime()) &&
+                        epicWithSubTasksTest.getEndTime().equals(subTaskTest2.getEndTime()) &&
+                        epicWithSubTasksTest.getDuration().equals(Duration.between(subTaskTest1.getStartTime(),
+                                subTaskTest2.getEndTime())),
+                "Временные показатели для эпика вычисляются некорректно!");
     }
 }

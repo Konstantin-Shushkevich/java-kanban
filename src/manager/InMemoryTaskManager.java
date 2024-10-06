@@ -18,7 +18,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected Map<Integer, Epic> epics = new HashMap<>();
     private HistoryManager historyManager = Managers.getDefaultHistory();
 
-    private final static Comparator<Task> comparator = (o1, o2) -> { // Компаратор для prioritizedTasks
+    private static final Comparator<Task> comparator = (o1, o2) -> { // Компаратор для prioritizedTasks
         if (o1.getStartTime() != null && o2.getStartTime() != null) {
             if (o1.getStartTime().isAfter(o2.getStartTime())) {
                 return 1;

@@ -80,7 +80,7 @@ public class Task {
         return duration;
     }
 
-    protected void setDuration(Duration duration) {
+    public void setDuration(Duration duration) {
         this.duration = duration;
     }
 
@@ -88,11 +88,14 @@ public class Task {
         return startTime;
     }
 
-    protected void setStartTime(LocalDateTime startTime) {
+    public void setStartTime(LocalDateTime startTime) {
         this.startTime = startTime;
     }
 
     public LocalDateTime getEndTime() {
+        if (startTime == null || duration == null) {
+            return null;
+        }
         return startTime.plus(duration);
     }
 
@@ -127,7 +130,11 @@ public class Task {
     }
 
     public String toStringForFile() {
-        return String.format("%s,%s,%s,%s,%s,%s,%s", id, TaskTypes.TASK, name, description, status,
-                duration.toMinutes(), startTime);
+        Long duration = this.duration == null
+                ? null
+                : this.duration.toMinutes();
+
+        return String.format("%s,%s,%s,%s,%s,%s,%s", id, TaskTypes.TASK, name, description, status, duration,
+                startTime);
     }
 }

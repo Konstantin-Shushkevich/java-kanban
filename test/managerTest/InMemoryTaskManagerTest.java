@@ -12,7 +12,6 @@ import utils.Managers;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.Month;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -519,7 +518,7 @@ class InMemoryTaskManagerTest {
         inMemoryTaskManager.addSubTask(subTaskTest1);
         inMemoryTaskManager.addSubTask(subTaskTest2);
 
-        List<Task> prioritizedTasksTestAsList = new ArrayList<>(inMemoryTaskManager.getPrioritizedTasks());
+        List<Task> prioritizedTasksTestAsList = inMemoryTaskManager.getPrioritizedTasks();
         assertTrue(prioritizedTasksTestAsList.size() == 4 &&
                         prioritizedTasksTestAsList.get(0) == taskTest1 &&
                         prioritizedTasksTestAsList.get(1) == taskTest2 &&

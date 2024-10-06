@@ -1,6 +1,5 @@
 package tasks;
 
-import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
@@ -39,14 +38,6 @@ public class Epic extends Task {
         subTasksIdInEpic.clear();
     }
 
-    public void setDuration(Duration duration) {
-        super.setDuration(duration);
-    }
-
-    public void setStartTime(LocalDateTime startTime) {
-        super.setStartTime(startTime);
-    }
-
     @Override
     public LocalDateTime getEndTime() {
         return endTime;
@@ -73,13 +64,16 @@ public class Epic extends Task {
 
     @Override
     public String toStringForFile() {
-        return String.format("%s,%s,%s,%s,%s,%s,%s,,%s", getId(), TaskTypes.EPIC, getName(), getDescription(),
-                getStatus(), getDuration().toMinutes(), getStartTime(), endTime);
+        Long duration = getDuration() == null
+                ? null
+                : getDuration().toMinutes();
+
+        return String.format("%s,%s,%s,%s,%s,%s,%s", getId(), TaskTypes.EPIC, getName(), getDescription(), getStatus(),
+                duration, getStartTime());
     }
 
     // Метод для записи в файл задачи типа Epic, в которую не были добавлены SubTasks
     public String toStringForFileFromEmptyEpic() {
-        return String.format("%s,%s,%s,%s,,,,", getId(), TaskTypes.EPIC, getName(),
-                getDescription());
+        return String.format("%s,%s,%s,%s", getId(), TaskTypes.EPIC, getName(), getDescription());
     }
 }

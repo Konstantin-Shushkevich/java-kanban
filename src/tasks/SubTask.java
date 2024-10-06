@@ -40,7 +40,11 @@ public class SubTask extends Task {
 
     @Override
     public String toStringForFile() {
+        Long duration = getDuration() == null
+                ? null
+                : getDuration().toMinutes();
+
         return String.format("%s,%s,%s,%s,%s,%s,%s,%s", getId(), TaskTypes.SUBTASK, getName(), getDescription(),
-                getStatus(), getDuration().toMinutes(), getStartTime(), getEpicId());
+                getStatus(), duration, getStartTime(), getEpicId());
     }
 }

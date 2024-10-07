@@ -34,14 +34,6 @@ public class InMemoryTaskManager implements TaskManager {
 
     protected Set<Task> prioritizedTasks = new TreeSet<>(comparator);
 
-    protected InMemoryTaskManager(Map<Integer, Task> tasks,
-                                  Map<Integer, SubTask> subTasks,
-                                  Map<Integer, Epic> epics) {
-        this.tasks = tasks;
-        this.subTasks = subTasks;
-        this.epics = epics;
-    } // Конструктор, используемый при восстановлении данных из файла
-
     public InMemoryTaskManager() {
     } // Базовый конструктор
 
@@ -58,8 +50,8 @@ public class InMemoryTaskManager implements TaskManager {
     //
     @Override
     public void deleteAllTasks() { // Удаление всех задач типа Task
-        tasks.keySet().forEach(id -> {
-            prioritizedTasks.remove(getTaskById(id));
+        tasks.forEach((id, task) -> {
+            prioritizedTasks.remove(task);
             historyManager.remove(id);
         });
         tasks.clear();
@@ -89,7 +81,10 @@ public class InMemoryTaskManager implements TaskManager {
 
         task.setId(taskId);
         tasks.put(taskId, task);
-        prioritizedTasks.add(task);
+
+        if (checkIfTimePropertiesExist(task)) {
+            prioritizedTasks.add(task);
+        }
     }
 
     @Override
@@ -97,7 +92,7 @@ public class InMemoryTaskManager implements TaskManager {
         int taskId = task.getId();
         Task oldTask = tasks.get(taskId);
 
-        if ((tasks.containsKey(taskId) &&
+        if ((oldTask != null &&
                 Objects.equals(oldTask.getStartTime(), task.getStartTime()) &&
                 Objects.equals(oldTask.getDuration(), task.getDuration())) ||
                 validateTimePeriods(task)) {
@@ -119,9 +114,9 @@ public class InMemoryTaskManager implements TaskManager {
     //
     @Override
     public void deleteAllSubTasks() { // Удаление всех задач типа SubTask
-        subTasks.forEach((key, value) -> {
-            historyManager.remove(key);
-            prioritizedTasks.remove(value);
+        subTasks.forEach((id, subTask) -> {
+            historyManager.remove(id);
+            prioritizedTasks.remove(subTask);
         });
 
         subTasks.clear();
@@ -157,7 +152,10 @@ public class InMemoryTaskManager implements TaskManager {
             int subTaskId = addNewId();
             subTask.setId(subTaskId);
             subTasks.put(subTaskId, subTask);
-            prioritizedTasks.add(subTask);
+
+            if (checkIfTimePropertiesExist(subTask)) {
+                prioritizedTasks.add(subTask);
+            }
 
             Epic currentEpic = epics.get(currentEpicId);
             currentEpic.addSubTaskIdInEpic(subTaskId);
@@ -171,7 +169,7 @@ public class InMemoryTaskManager implements TaskManager {
         int subTaskId = subTask.getId();
         SubTask oldSubTask = subTasks.get(subTaskId);
 
-        if ((subTasks.containsKey(subTaskId) &&
+        if ((oldSubTask != null &&
                 Objects.equals(oldSubTask.getStartTime(), subTask.getStartTime()) &&
                 Objects.equals(oldSubTask.getDuration(), subTask.getDuration())) ||
                 validateTimePeriods(subTask)) {
@@ -295,6 +293,7 @@ public class InMemoryTaskManager implements TaskManager {
                 countOfNewDeeds++;
             }
         }
+
         int numberOfSubtasks = epic.getSubTasksIdInEpic().size();
 
         if (countOfNewDeeds == numberOfSubtasks) {
@@ -309,6 +308,7 @@ public class InMemoryTaskManager implements TaskManager {
     protected void calculateEpicTimeProperties(Epic epic) { // Метод, рассчитывающий временные характеристики Epic
         List<SubTask> subTasksInCurrentEpic = new ArrayList<>(epic.getSubTasksIdInEpic().stream()
                 .map(stId -> subTasks.get(stId))
+                .filter(subTask -> subTask.getStartTime() != null && subTask.getDuration() != null)
                 .toList());
 
         subTasksInCurrentEpic.sort(comparator);
@@ -345,7 +345,17 @@ public class InMemoryTaskManager implements TaskManager {
         LocalDateTime start = newTask.getStartTime();
         LocalDateTime end = newTask.getEndTime();
 
-        return !((end.isBefore(currentTask.getStartTime()) || end.equals(currentTask.getStartTime()))
-                || (start.isAfter(currentTask.getEndTime()) || start.equals(currentTask.getEndTime())));
+        if (start == null || end == null) {
+            return false;
+        } else {
+            return !((end.isBefore(currentTask.getStartTime()) || end.equals(currentTask.getStartTime()))
+                    || (start.isAfter(currentTask.getEndTime()) || start.equals(currentTask.getEndTime())));
+        }
+    }
+
+    /*Метод для второго уровня валидации: Task и SubTask согласно ТЗ могут быть добавлены в трекер без временных
+    характеристик, но в таком случае они не должны быть добавлены в ранжированный список*/
+    private boolean checkIfTimePropertiesExist(Task task) {
+        return task.getStartTime() != null && task.getDuration() != null;
     }
 }

@@ -1,5 +1,6 @@
 package tasks;
 
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.ArrayList;
@@ -16,9 +17,23 @@ public class Epic extends Task {
         this.subTasksIdInEpic = new ArrayList<>();
     }
 
-    // Конструктор для обновления задачи типа Epic и его загрузки из файла
+    // Конструктор для обновления задачи типа Epic
     public Epic(String name, String description, int id) {
         super(name, description, id);
+        this.subTasksIdInEpic = new ArrayList<>();
+    }
+
+    // Конструктор для загрузки из файла задачи типа Epic (без субтасок)
+    public Epic(String name, String description, TaskStatus taskStatus, int id) {
+        super(name, description, taskStatus, id, null, null);
+        this.subTasksIdInEpic = new ArrayList<>();
+    }
+
+    // Конструктор для загрузки из файла задачи типа Epic (с субтасками)
+    public Epic(String name, String description, TaskStatus taskStatus, int id, Duration duration,
+                LocalDateTime startTime, LocalDateTime endTime) {
+        super(name, description, taskStatus, id, duration, startTime);
+        this.endTime = endTime;
         this.subTasksIdInEpic = new ArrayList<>();
     }
 
@@ -68,12 +83,12 @@ public class Epic extends Task {
                 ? null
                 : getDuration().toMinutes();
 
-        return String.format("%s,%s,%s,%s,%s,%s,%s", getId(), TaskTypes.EPIC, getName(), getDescription(), getStatus(),
-                duration, getStartTime());
+        return String.format("%s,%s,%s,%s,%s,%s,%s,,%s", getId(), TaskTypes.EPIC, getName(), getDescription(),
+                getStatus(), duration, getStartTime(), endTime);
     }
 
     // Метод для записи в файл задачи типа Epic, в которую не были добавлены SubTasks
     public String toStringForFileFromEmptyEpic() {
-        return String.format("%s,%s,%s,%s", getId(), TaskTypes.EPIC, getName(), getDescription());
+        return String.format("%s,%s,%s,%s,%s", getId(), TaskTypes.EPIC, getName(), getDescription(), getStatus());
     }
 }

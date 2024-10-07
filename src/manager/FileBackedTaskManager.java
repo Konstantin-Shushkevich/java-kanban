@@ -10,6 +10,8 @@ import java.util.*;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private String path;
+    private static final String HEADLINE_FOR_FILE =
+            "id,type,name,description,status,duration,startTime,epic,endTimeEpic";
 
     public FileBackedTaskManager(String path) {
         this.path = path;
@@ -81,7 +83,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             List<SubTask> subTasks = getSubTaskList();
             List<Epic> epics = getEpicList();
 
-            bufferedWriter.write("id,type,name,description,status,duration,startTime,epic\n");
+            bufferedWriter.write(HEADLINE_FOR_FILE + "\n");
 
             for (Task task : tasks) {
                 bufferedWriter.write(task.toStringForFile() + "\n");
@@ -117,54 +119,104 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     maxId = Integer.parseInt(dataInLine[0]);
                 }
 
-                int id = Integer.parseInt(dataInLine[0]);
-                TaskTypes type = TaskTypes.valueOf(dataInLine[1]);
-                String name = dataInLine[2];
-                String description = dataInLine[3];
-                String status = "";
-                String duration = "";
-                String startTime = "";
-                if (dataInLine.length >= 5) {
-                    status = dataInLine[4];
-                    duration = dataInLine[5];
-                    startTime = dataInLine[6];
-                }
-
-                if (type == TaskTypes.TASK) {
-                    Task task = new Task(name, description, TaskStatus.valueOf(status), id,
-                            Duration.ofMinutes(Integer.parseInt(duration)), LocalDateTime.parse(startTime));
-                    taskManager.tasks.put(task.getId(), task);
-                } else if (type == TaskTypes.EPIC) {
-                    Epic epic = new Epic(name, description, id);
-                    taskManager.epics.put(epic.getId(), epic);
-                } else {
-                    String epicIdForSubTask = dataInLine[7];
-                    SubTask subTask = new SubTask(name, description, TaskStatus.valueOf(status), id,
-                            Integer.parseInt(epicIdForSubTask), Duration.ofMinutes(Integer.parseInt(duration)),
-                            LocalDateTime.parse(startTime));
-                    taskManager.subTasks.put(subTask.getId(), subTask);
-
-                    int epicId = Integer.parseInt(epicIdForSubTask); // Обновление внутреннего списка субтасок в эпике
-                    Epic currentEpic = taskManager.epics.get(epicId);
-                    currentEpic.addSubTaskIdInEpic(id);
-                    taskManager.epics.put(currentEpic.getId(), currentEpic);
-                }
+                convertFromArrayToTaskAndAddToTaskManager(dataInLine, taskManager);
             }
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка при чтении файла!");
         }
-        taskManager.getEpicList()
-                .forEach(taskManager::calculateEpicTimeProperties);
-        taskManager.getEpicList()
-                .forEach(taskManager::calculateEpicStatus);
-        taskManager.loadPrioritizedTasksFromFile();
         taskManager.setId(maxId);
         return taskManager;
     }
 
-    // Служебный метод для восстановления коллекции задач, отсортированной по приорететности
-    protected void loadPrioritizedTasksFromFile() {
-        prioritizedTasks.addAll(tasks.values());
-        prioritizedTasks.addAll(subTasks.values());
+    private static void convertFromArrayToTaskAndAddToTaskManager(String[] dataInLine,
+                                                                  FileBackedTaskManager taskManager) {
+        int id = Integer.parseInt(dataInLine[0]);
+        TaskTypes type = TaskTypes.valueOf(dataInLine[1]);
+        String name = dataInLine[2];
+        String description = dataInLine[3];
+        String status = dataInLine[4];
+        String duration = "";
+        String startTime = "";
+        String endTimeEpic = "";
+
+        if (dataInLine.length >= 6) {
+            duration = dataInLine[5];
+            startTime = dataInLine[6];
+        }
+
+        if (dataInLine.length == 9) {
+            endTimeEpic = dataInLine[8];
+        }
+
+        if (type == TaskTypes.TASK) {
+            Task task;
+            if (checkIfDurationAndStartTimeAreNull(duration, startTime)) {
+                task = new Task(name, description, TaskStatus.valueOf(status), id, null, null);
+            } else if (checkIfStartTimeIsNotNullAndDurationIs(duration, startTime)) {
+                task = new Task(name, description, TaskStatus.valueOf(status), id, null,
+                        LocalDateTime.parse(startTime));
+            } else if (checkIfDurationIsNotNullAndStartTimeIs(duration, startTime)) {
+                task = new Task(name, description, TaskStatus.valueOf(status), id,
+                        Duration.ofMinutes(Integer.parseInt(duration)), null);
+            } else {
+                task = new Task(name, description, TaskStatus.valueOf(status), id,
+                        Duration.ofMinutes(Integer.parseInt(duration)), LocalDateTime.parse(startTime));
+                taskManager.prioritizedTasks.add(task);
+            }
+            taskManager.tasks.put(task.getId(), task);
+        } else if (type == TaskTypes.EPIC) {
+            Epic epic;
+            if (dataInLine.length < 9) {
+                epic = new Epic(name, description, TaskStatus.valueOf(status), id);
+            } else if (checkIfDurationAndStartTimeAreNull(duration, startTime)) {
+                epic = new Epic(name, description, TaskStatus.valueOf(status), id, null, null,
+                        null);
+            } else if (checkIfStartTimeIsNotNullAndDurationIs(duration, startTime)) {
+                epic = new Epic(name, description, TaskStatus.valueOf(status), id, null,
+                        LocalDateTime.parse(startTime), null);
+            } else {
+                epic = new Epic(name, description, TaskStatus.valueOf(status), id,
+                        Duration.ofMinutes(Integer.parseInt(duration)), LocalDateTime.parse(startTime),
+                        LocalDateTime.parse(endTimeEpic));
+            }
+            taskManager.epics.put(epic.getId(), epic);
+        } else {
+            String epicIdForSubTask = dataInLine[7];
+            SubTask subTask;
+            if (checkIfDurationAndStartTimeAreNull(duration, startTime)) {
+                subTask = new SubTask(name, description, TaskStatus.valueOf(status), id,
+                        Integer.parseInt(epicIdForSubTask), null, null);
+            } else if (checkIfStartTimeIsNotNullAndDurationIs(duration, startTime)) {
+                subTask = new SubTask(name, description, TaskStatus.valueOf(status), id,
+                        Integer.parseInt(epicIdForSubTask), null, LocalDateTime.parse(startTime));
+            } else if (checkIfDurationIsNotNullAndStartTimeIs(duration, startTime)) {
+                subTask = new SubTask(name, description, TaskStatus.valueOf(status), id,
+                        Integer.parseInt(epicIdForSubTask), Duration.ofMinutes(Integer.parseInt(duration)),
+                        null);
+            } else {
+                subTask = new SubTask(name, description, TaskStatus.valueOf(status), id,
+                        Integer.parseInt(epicIdForSubTask), Duration.ofMinutes(Integer.parseInt(duration)),
+                        LocalDateTime.parse(startTime));
+                taskManager.prioritizedTasks.add(subTask);
+            }
+            taskManager.subTasks.put(subTask.getId(), subTask);
+
+            int epicId = Integer.parseInt(epicIdForSubTask); // Обновление внутреннего списка субтасок в эпике
+            Epic currentEpic = taskManager.epics.get(epicId);
+            currentEpic.addSubTaskIdInEpic(id);
+        }
+    }
+
+    // Методы валидации загружаемых из файла данных (защита от NPE)
+    private static boolean checkIfDurationAndStartTimeAreNull(String duration, String startTime) {
+        return Objects.equals(duration, "null") && Objects.equals(startTime, "null");
+    }
+
+    private static boolean checkIfStartTimeIsNotNullAndDurationIs(String duration, String startTime) {
+        return Objects.equals(duration, "null") && !Objects.equals(startTime, "null");
+    }
+
+    private static boolean checkIfDurationIsNotNullAndStartTimeIs(String duration, String startTime) {
+        return !Objects.equals(duration, "null") && Objects.equals(startTime, "null");
     }
 }

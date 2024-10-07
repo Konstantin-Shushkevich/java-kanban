@@ -3,18 +3,25 @@ import tasks.Epic;
 import tasks.SubTask;
 import utils.Managers;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.Month;
+
 public class Main {
     public static void main(String[] args) {
         InMemoryTaskManager inMemoryTaskManager = (InMemoryTaskManager) Managers.getDefault();
-        Epic epicWithSubTasks = new Epic("Курс Java", "Изучить Java");
-        Epic epicNoSubTasks = new Epic("Успешно завершить 2-й модуль", "Сдать ФЗ №6 и т.д.");
+        Epic epicWithSubTasks = new Epic("Большое дело", "Описание большого дела");
+        Epic epicNoSubTasks = new Epic("Еще одно большое дело", "Описание второго большого дела");
 
         inMemoryTaskManager.addEpic(epicWithSubTasks);
         inMemoryTaskManager.addEpic(epicNoSubTasks);
 
-        SubTask subTask1 = new SubTask("Изучить Java Core", "Внимательно", epicWithSubTasks.getId());
-        SubTask subTask2 = new SubTask("Изучить Spring", "Досконально", epicWithSubTasks.getId());
-        SubTask subTask3 = new SubTask("Диплом", "Качественно", epicWithSubTasks.getId());
+        SubTask subTask1 = new SubTask("Подзадача 1", "Описание подзадачи 1", epicWithSubTasks.getId(),
+                Duration.ofHours(24), LocalDateTime.of(2024, Month.JANUARY, 1, 0, 0));
+        SubTask subTask2 = new SubTask("Подзадача 2", "Описание подзадачи 2", epicWithSubTasks.getId(),
+                Duration.ofMinutes(60), LocalDateTime.of(2024, Month.FEBRUARY, 6, 12, 0));
+        SubTask subTask3 = new SubTask("Подзадача 3", "Описание подзадачи 3", epicWithSubTasks.getId(),
+                Duration.ofMinutes(120), LocalDateTime.of(2024, Month.FEBRUARY, 6, 15, 0));
 
         inMemoryTaskManager.addSubTask(subTask1);
         inMemoryTaskManager.addSubTask(subTask2);

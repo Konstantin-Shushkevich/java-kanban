@@ -11,7 +11,7 @@ import java.util.*;
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private String path;
     private static final String HEADLINE_FOR_FILE =
-            "id,type,name,description,status,duration,startTime,epic,endTimeEpic";
+            "id,type,name,description,status,duration,startTime,endTimeEpic,epic";
 
     public FileBackedTaskManager(String path) {
         this.path = path;
@@ -134,89 +134,65 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         TaskTypes type = TaskTypes.valueOf(dataInLine[1]);
         String name = dataInLine[2];
         String description = dataInLine[3];
-        String status = dataInLine[4];
-        String duration = "";
-        String startTime = "";
-        String endTimeEpic = "";
+        TaskStatus status = TaskStatus.valueOf(dataInLine[4]);
+        Duration duration = null;
+        LocalDateTime startTime = null;
+        LocalDateTime endTimeEpic = null;
 
         if (dataInLine.length >= 6) {
-            duration = dataInLine[5];
-            startTime = dataInLine[6];
+            duration = parseDuration(dataInLine[5]);
+            startTime = parseDate(dataInLine[6]);
         }
 
-        if (dataInLine.length == 9) {
-            endTimeEpic = dataInLine[8];
+        if (dataInLine.length == 8) {
+            endTimeEpic = parseDate(dataInLine[7]);
         }
 
         if (type == TaskTypes.TASK) {
-            Task task;
-            if (checkIfDurationAndStartTimeAreNull(duration, startTime)) {
-                task = new Task(name, description, TaskStatus.valueOf(status), id, null, null);
-            } else if (checkIfStartTimeIsNotNullAndDurationIs(duration, startTime)) {
-                task = new Task(name, description, TaskStatus.valueOf(status), id, null,
-                        LocalDateTime.parse(startTime));
-            } else if (checkIfDurationIsNotNullAndStartTimeIs(duration, startTime)) {
-                task = new Task(name, description, TaskStatus.valueOf(status), id,
-                        Duration.ofMinutes(Integer.parseInt(duration)), null);
-            } else {
-                task = new Task(name, description, TaskStatus.valueOf(status), id,
-                        Duration.ofMinutes(Integer.parseInt(duration)), LocalDateTime.parse(startTime));
+            Task task = new Task(name, description, status, id, duration, startTime);
+
+            if (duration != null && startTime != null) {
                 taskManager.prioritizedTasks.add(task);
             }
+
             taskManager.tasks.put(task.getId(), task);
         } else if (type == TaskTypes.EPIC) {
             Epic epic;
-            if (dataInLine.length < 9) {
-                epic = new Epic(name, description, TaskStatus.valueOf(status), id);
-            } else if (checkIfDurationAndStartTimeAreNull(duration, startTime)) {
-                epic = new Epic(name, description, TaskStatus.valueOf(status), id, null, null,
-                        null);
-            } else if (checkIfStartTimeIsNotNullAndDurationIs(duration, startTime)) {
-                epic = new Epic(name, description, TaskStatus.valueOf(status), id, null,
-                        LocalDateTime.parse(startTime), null);
+
+            if (dataInLine.length < 8) {
+                epic = new Epic(name, description, status, id);
             } else {
-                epic = new Epic(name, description, TaskStatus.valueOf(status), id,
-                        Duration.ofMinutes(Integer.parseInt(duration)), LocalDateTime.parse(startTime),
-                        LocalDateTime.parse(endTimeEpic));
+                epic = new Epic(name, description, status, id, duration, startTime, endTimeEpic);
             }
+
             taskManager.epics.put(epic.getId(), epic);
         } else {
-            String epicIdForSubTask = dataInLine[7];
-            SubTask subTask;
-            if (checkIfDurationAndStartTimeAreNull(duration, startTime)) {
-                subTask = new SubTask(name, description, TaskStatus.valueOf(status), id,
-                        Integer.parseInt(epicIdForSubTask), null, null);
-            } else if (checkIfStartTimeIsNotNullAndDurationIs(duration, startTime)) {
-                subTask = new SubTask(name, description, TaskStatus.valueOf(status), id,
-                        Integer.parseInt(epicIdForSubTask), null, LocalDateTime.parse(startTime));
-            } else if (checkIfDurationIsNotNullAndStartTimeIs(duration, startTime)) {
-                subTask = new SubTask(name, description, TaskStatus.valueOf(status), id,
-                        Integer.parseInt(epicIdForSubTask), Duration.ofMinutes(Integer.parseInt(duration)),
-                        null);
-            } else {
-                subTask = new SubTask(name, description, TaskStatus.valueOf(status), id,
-                        Integer.parseInt(epicIdForSubTask), Duration.ofMinutes(Integer.parseInt(duration)),
-                        LocalDateTime.parse(startTime));
+            int epicId = Integer.parseInt(dataInLine[8]);
+
+            SubTask subTask = new SubTask(name, description, status, id, epicId, duration, startTime);
+
+            if (duration != null && startTime != null) {
                 taskManager.prioritizedTasks.add(subTask);
             }
+
             taskManager.subTasks.put(subTask.getId(), subTask);
 
-            int epicId = Integer.parseInt(epicIdForSubTask); // Обновление внутреннего списка субтасок в эпике
-            Epic currentEpic = taskManager.epics.get(epicId);
+            Epic currentEpic = taskManager.epics.get(epicId); // Обновление внутреннего списка субтасок в эпике
             currentEpic.addSubTaskIdInEpic(id);
         }
     }
 
-    // Методы валидации загружаемых из файла данных (защита от NPE)
-    private static boolean checkIfDurationAndStartTimeAreNull(String duration, String startTime) {
-        return Objects.equals(duration, "null") && Objects.equals(startTime, "null");
+    private static LocalDateTime parseDate(String date) {
+        if (date.equals("null")) {
+            return null;
+        }
+        return LocalDateTime.parse(date);
     }
 
-    private static boolean checkIfStartTimeIsNotNullAndDurationIs(String duration, String startTime) {
-        return Objects.equals(duration, "null") && !Objects.equals(startTime, "null");
-    }
-
-    private static boolean checkIfDurationIsNotNullAndStartTimeIs(String duration, String startTime) {
-        return !Objects.equals(duration, "null") && Objects.equals(startTime, "null");
+    private static Duration parseDuration(String duration) {
+        if (duration.equals("null")) {
+            return null;
+        }
+        return Duration.ofMinutes(Integer.parseInt(duration));
     }
 }

@@ -44,7 +44,7 @@ public class SubTask extends Task {
                 ? null
                 : getDuration().toMinutes();
 
-        return String.format("%s,%s,%s,%s,%s,%s,%s,%s", getId(), TaskTypes.SUBTASK, getName(), getDescription(),
+        return String.format("%s,%s,%s,%s,%s,%s,%s,,%s", getId(), TaskTypes.SUBTASK, getName(), getDescription(),
                 getStatus(), duration, getStartTime(), getEpicId());
     }
 }

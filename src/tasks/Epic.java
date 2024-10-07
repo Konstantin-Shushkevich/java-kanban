@@ -83,7 +83,7 @@ public class Epic extends Task {
                 ? null
                 : getDuration().toMinutes();
 
-        return String.format("%s,%s,%s,%s,%s,%s,%s,,%s", getId(), TaskTypes.EPIC, getName(), getDescription(),
+        return String.format("%s,%s,%s,%s,%s,%s,%s,%s", getId(), TaskTypes.EPIC, getName(), getDescription(),
                 getStatus(), duration, getStartTime(), endTime);
     }
 

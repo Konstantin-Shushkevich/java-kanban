@@ -4,22 +4,16 @@ import exceptions.ManagerSaveException;
 import tasks.*;
 
 import java.io.*;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.*;
 
 public class FileBackedTaskManager extends InMemoryTaskManager {
     private String path;
+    private static final String HEADLINE_FOR_FILE =
+            "id,type,name,description,status,duration,startTime,endTimeEpic,epic";
 
     public FileBackedTaskManager(String path) {
-        this.path = path;
-    }
-
-    private FileBackedTaskManager(String path,
-                                  Map<Integer, Task> tasks,
-                                  Map<Integer, SubTask> subTasks,
-                                  Map<Integer, Epic> epics) {
-        super(tasks, subTasks, epics);
         this.path = path;
     }
 
@@ -89,14 +83,18 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
             List<SubTask> subTasks = getSubTaskList();
             List<Epic> epics = getEpicList();
 
-            bufferedWriter.write("id,type,name,status,description,epic\n");
+            bufferedWriter.write(HEADLINE_FOR_FILE + "\n");
 
             for (Task task : tasks) {
                 bufferedWriter.write(task.toStringForFile() + "\n");
             }
 
             for (Epic epic : epics) {
-                bufferedWriter.write(epic.toStringForFile() + "\n");
+                if (epic.getSubTasksIdInEpic().isEmpty()) {
+                    bufferedWriter.write(epic.toStringForFileFromEmptyEpic() + "\n");
+                } else {
+                    bufferedWriter.write(epic.toStringForFile() + "\n");
+                }
             }
 
             for (SubTask subTask : subTasks) {
@@ -108,9 +106,7 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
     }
 
     public static FileBackedTaskManager loadFromFile(String path) {
-        Map<Integer, Task> loadedTasks = new HashMap<>();
-        Map<Integer, SubTask> loadedSubTasks = new HashMap<>();
-        Map<Integer, Epic> loadedEpics = new HashMap<>();
+        FileBackedTaskManager taskManager = new FileBackedTaskManager(path);
         int maxId = 0;
 
         try (BufferedReader bufferedReader = new BufferedReader(new FileReader(path))) {
@@ -123,30 +119,80 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
                     maxId = Integer.parseInt(dataInLine[0]);
                 }
 
-                if (TaskTypes.valueOf(dataInLine[1]) == TaskTypes.TASK) {
-                    Task task = new Task(dataInLine[2], dataInLine[4], TaskStatus.valueOf(dataInLine[3]),
-                            Integer.parseInt(dataInLine[0]));
-                    loadedTasks.put(task.getId(), task);
-                } else if (TaskTypes.valueOf(dataInLine[1]) == TaskTypes.EPIC) {
-                    Epic epic = new Epic(dataInLine[2], dataInLine[4], TaskStatus.valueOf(dataInLine[3]),
-                            Integer.parseInt(dataInLine[0]));
-                    loadedEpics.put(epic.getId(), epic);
-                } else {
-                    SubTask subTask = new SubTask(dataInLine[2], dataInLine[4], TaskStatus.valueOf(dataInLine[3]),
-                            Integer.parseInt(dataInLine[0]), Integer.parseInt(dataInLine[5]));
-                    loadedSubTasks.put(subTask.getId(), subTask);
-
-                    int epicId = Integer.parseInt(dataInLine[5]); // Обновление внутреннего списка субтасок в эпике
-                    Epic currentEpic = loadedEpics.get(epicId);
-                    currentEpic.addSubTaskIdInEpic(Integer.parseInt(dataInLine[5]));
-                    loadedEpics.put(epicId, currentEpic);
-                }
+                convertFromArrayToTaskAndAddToTaskManager(dataInLine, taskManager);
             }
         } catch (IOException e) {
             throw new ManagerSaveException("Ошибка при чтении файла!");
         }
-        FileBackedTaskManager taskManager = new FileBackedTaskManager(path, loadedTasks, loadedSubTasks, loadedEpics);
         taskManager.setId(maxId);
         return taskManager;
+    }
+
+    private static void convertFromArrayToTaskAndAddToTaskManager(String[] dataInLine,
+                                                                  FileBackedTaskManager taskManager) {
+        int id = Integer.parseInt(dataInLine[0]);
+        TaskTypes type = TaskTypes.valueOf(dataInLine[1]);
+        String name = dataInLine[2];
+        String description = dataInLine[3];
+        TaskStatus status = TaskStatus.valueOf(dataInLine[4]);
+        Duration duration = null;
+        LocalDateTime startTime = null;
+        LocalDateTime endTimeEpic = null;
+
+        if (dataInLine.length >= 6) {
+            duration = parseDuration(dataInLine[5]);
+            startTime = parseDate(dataInLine[6]);
+        }
+
+        if (dataInLine.length == 8) {
+            endTimeEpic = parseDate(dataInLine[7]);
+        }
+
+        if (type == TaskTypes.TASK) {
+            Task task = new Task(name, description, status, id, duration, startTime);
+
+            if (duration != null && startTime != null) {
+                taskManager.prioritizedTasks.add(task);
+            }
+
+            taskManager.tasks.put(task.getId(), task);
+        } else if (type == TaskTypes.EPIC) {
+            Epic epic;
+
+            if (dataInLine.length < 8) {
+                epic = new Epic(name, description, status, id);
+            } else {
+                epic = new Epic(name, description, status, id, duration, startTime, endTimeEpic);
+            }
+
+            taskManager.epics.put(epic.getId(), epic);
+        } else {
+            int epicId = Integer.parseInt(dataInLine[8]);
+
+            SubTask subTask = new SubTask(name, description, status, id, epicId, duration, startTime);
+
+            if (duration != null && startTime != null) {
+                taskManager.prioritizedTasks.add(subTask);
+            }
+
+            taskManager.subTasks.put(subTask.getId(), subTask);
+
+            Epic currentEpic = taskManager.epics.get(epicId); // Обновление внутреннего списка субтасок в эпике
+            currentEpic.addSubTaskIdInEpic(id);
+        }
+    }
+
+    private static LocalDateTime parseDate(String date) {
+        if (date.equals("null")) {
+            return null;
+        }
+        return LocalDateTime.parse(date);
+    }
+
+    private static Duration parseDuration(String duration) {
+        if (duration.equals("null")) {
+            return null;
+        }
+        return Duration.ofMinutes(Integer.parseInt(duration));
     }
 }

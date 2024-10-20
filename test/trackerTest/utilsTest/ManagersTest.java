@@ -1,10 +1,10 @@
-package utilsTest;
+package trackerTest.utilsTest;
 
-import history.HistoryManager;
-import manager.FileBackedTaskManager;
-import manager.TaskManager;
+import tracker.history.HistoryManager;
+import tracker.manager.FileBackedTaskManager;
+import tracker.manager.TaskManager;
 import org.junit.jupiter.api.Test;
-import utils.Managers;
+import tracker.utils.Managers;
 
 import java.io.File;
 import java.io.IOException;

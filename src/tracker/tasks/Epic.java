@@ -1,4 +1,4 @@
-package tasks;
+package tracker.tasks;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

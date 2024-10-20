@@ -1,10 +1,10 @@
-package utils;
+package tracker.utils;
 
-import history.HistoryManager;
-import manager.FileBackedTaskManager;
-import manager.InMemoryTaskManager;
-import manager.TaskManager;
-import history.InMemoryHistoryManager;
+import tracker.history.HistoryManager;
+import tracker.manager.FileBackedTaskManager;
+import tracker.manager.InMemoryTaskManager;
+import tracker.manager.TaskManager;
+import tracker.history.InMemoryHistoryManager;
 
 public class Managers {
     public static TaskManager getDefault() {

@@ -1,13 +1,13 @@
-package managerTest;
+package trackerTest.managerTest;
 
-import manager.TaskManager;
+import tracker.manager.TaskManager;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import tasks.Epic;
-import tasks.SubTask;
-import tasks.Task;
-import tasks.TaskStatus;
-import utils.Managers;
+import tracker.tasks.Epic;
+import tracker.tasks.SubTask;
+import tracker.tasks.Task;
+import tracker.tasks.TaskStatus;
+import tracker.utils.Managers;
 
 import java.time.Duration;
 import java.time.LocalDateTime;

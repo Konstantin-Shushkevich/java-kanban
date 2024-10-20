@@ -1,8 +1,8 @@
-package manager;
+package tracker.manager;
 
-import tasks.Epic;
-import tasks.SubTask;
-import tasks.Task;
+import tracker.tasks.Epic;
+import tracker.tasks.SubTask;
+import tracker.tasks.Task;
 
 import java.util.List;
 
@@ -14,11 +14,11 @@ public interface TaskManager {
 
     Task getTaskById(int taskId);
 
-    void addTask(Task task);
+    boolean addTask(Task task);
 
-    void updateTask(Task task);
+    boolean updateTask(Task task);
 
-    void deleteTaskById(int taskId);
+    boolean deleteTaskById(int taskId);
 
     void deleteAllSubTasks();
 
@@ -26,11 +26,11 @@ public interface TaskManager {
 
     SubTask getSubTaskById(int subTaskId);
 
-    void addSubTask(SubTask subTask);
+    boolean addSubTask(SubTask subTask);
 
-    void updateSubTask(SubTask subTask);
+    boolean updateSubTask(SubTask subTask);
 
-    void deleteSubTaskById(Integer subTaskId);
+    boolean deleteSubTaskById(Integer subTaskId);
 
     void deleteAllEpics();
 
@@ -38,13 +38,13 @@ public interface TaskManager {
 
     Epic getEpicById(int epicId);
 
-    void addEpic(Epic epic);
+    boolean addEpic(Epic epic);
 
     void updateEpic(Epic epic);
 
     List<SubTask> getSubTasksInEpic(Integer epicId);
 
-    void deleteEpicById(Integer epicId);
+    boolean deleteEpicById(Integer epicId);
 
     List<Task> getHistory();
 

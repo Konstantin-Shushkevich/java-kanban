@@ -1,6 +1,6 @@
-package history;
+package tracker.history;
 
-import tasks.Task;
+import tracker.tasks.Task;
 
 import java.util.*;
 

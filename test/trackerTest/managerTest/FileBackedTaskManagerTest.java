@@ -1,11 +1,11 @@
-package managerTest;
+package trackerTest.managerTest;
 
-import manager.FileBackedTaskManager;
+import tracker.manager.FileBackedTaskManager;
 import org.junit.jupiter.api.Test;
-import tasks.Epic;
-import tasks.SubTask;
-import tasks.Task;
-import utils.Managers;
+import tracker.tasks.Epic;
+import tracker.tasks.SubTask;
+import tracker.tasks.Task;
+import tracker.utils.Managers;
 
 import java.io.File;
 import java.io.IOException;

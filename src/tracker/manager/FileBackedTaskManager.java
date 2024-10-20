@@ -1,7 +1,7 @@
-package manager;
+package tracker.manager;
 
-import exceptions.ManagerSaveException;
-import tasks.*;
+import tracker.exceptions.ManagerSaveException;
+import tracker.tasks.*;
 
 import java.io.*;
 import java.time.Duration;
@@ -22,19 +22,22 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         save();
     }
 
-    public void addTask(Task task) {
-        super.addTask(task);
+    public boolean addTask(Task task) {
+        boolean wasAdded = super.addTask(task);
         save();
+        return wasAdded;
     }
 
-    public void updateTask(Task task) {
-        super.updateTask(task);
+    public boolean updateTask(Task task) {
+        boolean wasUpdated = super.updateTask(task);
         save();
+        return wasUpdated;
     }
 
-    public void deleteTaskById(int taskId) {
-        super.deleteTaskById(taskId);
+    public boolean deleteTaskById(int taskId) {
+        boolean wasDeleted = super.deleteTaskById(taskId);
         save();
+        return wasDeleted;
     }
 
     public void deleteAllSubTasks() {
@@ -42,19 +45,22 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         save();
     }
 
-    public void addSubTask(SubTask subTask) {
-        super.addSubTask(subTask);
+    public boolean addSubTask(SubTask subTask) {
+        boolean wasAdded = super.addSubTask(subTask);
         save();
+        return wasAdded;
     }
 
-    public void updateSubTask(SubTask subTask) {
-        super.updateSubTask(subTask);
+    public boolean updateSubTask(SubTask subTask) {
+        boolean wasUpdated = super.updateSubTask(subTask);
         save();
+        return wasUpdated;
     }
 
-    public void deleteSubTaskById(Integer subTaskId) {
-        super.deleteSubTaskById(subTaskId);
+    public boolean deleteSubTaskById(Integer subTaskId) {
+        boolean wasDeleted = super.deleteSubTaskById(subTaskId);
         save();
+        return wasDeleted;
     }
 
     public void deleteAllEpics() {
@@ -62,9 +68,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         save();
     }
 
-    public void addEpic(Epic epic) {
-        super.addEpic(epic);
+    public boolean addEpic(Epic epic) {
+        boolean wasAdded = super.addEpic(epic);
         save();
+        return wasAdded;
     }
 
     public void updateEpic(Epic epic) {
@@ -72,9 +79,10 @@ public class FileBackedTaskManager extends InMemoryTaskManager {
         save();
     }
 
-    public void deleteEpicById(Integer epicId) {
-        super.deleteEpicById(epicId);
+    public boolean deleteEpicById(Integer epicId) {
+        boolean wasDeleted = super.deleteEpicById(epicId);
         save();
+        return wasDeleted;
     }
 
     private void save() {

@@ -1,4 +1,4 @@
-package tasks;
+package tracker.tasks;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -15,7 +15,7 @@ public class Task {
     // Конструктор для добавления задач типа Task
     public Task(String name, String description, Duration duration, LocalDateTime startTime) {
         this(name, description);
-        this.id = 1;
+        this.id = 0;
         this.status = TaskStatus.NEW;
         this.duration = duration;
         this.startTime = startTime;

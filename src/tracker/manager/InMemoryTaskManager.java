@@ -1,11 +1,11 @@
-package manager;
+package tracker.manager;
 
-import history.HistoryManager;
-import tasks.Epic;
-import tasks.SubTask;
-import tasks.Task;
-import tasks.TaskStatus;
-import utils.Managers;
+import tracker.history.HistoryManager;
+import tracker.tasks.Epic;
+import tracker.tasks.SubTask;
+import tracker.tasks.Task;
+import tracker.tasks.TaskStatus;
+import tracker.utils.Managers;
 
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -72,9 +72,9 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void addTask(Task task) { // Добавление задачи типа Task
+    public boolean addTask(Task task) { // Добавление задачи типа Task
         if (!validateTimePeriods(task)) {
-            return;
+            return false;
         }
 
         int taskId = addNewId();
@@ -85,10 +85,11 @@ public class InMemoryTaskManager implements TaskManager {
         if (checkIfTimePropertiesExist(task)) {
             prioritizedTasks.add(task);
         }
+        return true;
     }
 
     @Override
-    public void updateTask(Task task) { // Обновление задачи типа Task
+    public boolean updateTask(Task task) { // Обновление задачи типа Task
         int taskId = task.getId();
         Task oldTask = tasks.get(taskId);
 
@@ -99,14 +100,22 @@ public class InMemoryTaskManager implements TaskManager {
             tasks.put(taskId, task);
             prioritizedTasks.remove(oldTask);
             prioritizedTasks.add(task);
+            return true;
         }
+        return false;
     }
 
     @Override
-    public void deleteTaskById(int taskId) { // Удаление задачи типа Task по id
+    public boolean deleteTaskById(int taskId) { // Удаление задачи типа Task по id
         Task taskForDelete = tasks.remove(taskId);
+
+        if (taskForDelete == null) { // Проверка на случай попытки удаления по несуществующему для Task id
+            return false;
+        }
+
         prioritizedTasks.remove(taskForDelete);
         historyManager.remove(taskId);
+        return true;
     }
 
     //
@@ -145,7 +154,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void addSubTask(SubTask subTask) { // Добавление задачи типа SubTask
+    public boolean addSubTask(SubTask subTask) { // Добавление задачи типа SubTask
         int currentEpicId = subTask.getEpicId();
 
         if (epics.containsKey(currentEpicId) && validateTimePeriods(subTask)) {
@@ -161,11 +170,13 @@ public class InMemoryTaskManager implements TaskManager {
             currentEpic.addSubTaskIdInEpic(subTaskId);
             calculateEpicStatus(currentEpic);
             calculateEpicTimeProperties(currentEpic);
+            return true;
         }
+        return false;
     }
 
     @Override
-    public void updateSubTask(SubTask subTask) { // Обновление задачи типа SubTask
+    public boolean updateSubTask(SubTask subTask) { // Обновление задачи типа SubTask
         int subTaskId = subTask.getId();
         SubTask oldSubTask = subTasks.get(subTaskId);
 
@@ -182,11 +193,13 @@ public class InMemoryTaskManager implements TaskManager {
 
             calculateEpicStatus(currentEpic);
             calculateEpicTimeProperties(currentEpic);
+            return true;
         }
+        return false;
     }
 
     @Override
-    public void deleteSubTaskById(Integer subTaskId) { // Удаление задачи типа SubTask по id
+    public boolean deleteSubTaskById(Integer subTaskId) { // Удаление задачи типа SubTask по id
         if (subTasks.containsKey(subTaskId)) {
             SubTask currentSubTask = subTasks.get(subTaskId);
             int epicForCurrentSubTaskId = currentSubTask.getEpicId();
@@ -198,7 +211,9 @@ public class InMemoryTaskManager implements TaskManager {
             prioritizedTasks.remove(currentSubTask);
             subTasks.remove(subTaskId);
             historyManager.remove(subTaskId);
+            return true;
         }
+        return false;
     }
 
     //
@@ -234,11 +249,12 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void addEpic(Epic epic) { // Добавление задачи типа Epic
+    public boolean addEpic(Epic epic) { // Добавление задачи типа Epic
         int epicId = addNewId();
 
         epic.setId(epicId);
         epics.put(epicId, epic);
+        return true;
     }
 
     @Override
@@ -265,7 +281,7 @@ public class InMemoryTaskManager implements TaskManager {
     }
 
     @Override
-    public void deleteEpicById(Integer epicId) { // Удаление задачи типа Epic по id
+    public boolean deleteEpicById(Integer epicId) { // Удаление задачи типа Epic по id
         if (epics.containsKey(epicId)) {
             Epic currentEpic = getEpicById(epicId);
             List<Integer> subTasksInEpicId = currentEpic.getSubTasksIdInEpic();
@@ -278,7 +294,9 @@ public class InMemoryTaskManager implements TaskManager {
 
             epics.remove(epicId);
             historyManager.remove(epicId);
+            return true;
         }
+        return false;
     }
 
     protected void calculateEpicStatus(Epic epic) { // Метод обновления статуса для Epic, содержащего субтаски
